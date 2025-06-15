@@ -580,25 +580,6 @@ See `examples/websocket.ts` for a complete working example.
 - Auto-reconnection is enabled by default
 - All private data is pushed by default after login unless `subscribe: false` is used
 
-**WebSocket Status:**
-
-⚠️ **Note**: The WebSocket implementation is currently experimental. The MEXC WebSocket API for browser session tokens may require additional authentication steps that are not yet fully documented. The connection and ping/pong work correctly, but private data authentication may need further investigation.
-
-**What works:**
-
-- ✅ WebSocket connection to `wss://contract.mexc.com/edge`
-- ✅ Ping/pong heartbeat mechanism
-- ✅ Auto-reconnection
-- ✅ Event-driven architecture
-
-**What needs investigation:**
-
-- ⚠️ Private data authentication (login method)
-- ⚠️ Signature generation for WebSocket login
-- ⚠️ Real-time order/position updates
-
-If you have experience with MEXC WebSocket authentication, contributions are welcome!
-
 #### `getRiskLimit()`
 
 Get account risk limits.
