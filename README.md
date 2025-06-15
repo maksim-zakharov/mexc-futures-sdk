@@ -23,13 +23,45 @@
 
 SDK for MEXC Futures trading using web-based authentication (browser session tokens).
 
+## Quick Start
+
+```bash
+# Install the package
+npm install mexc-futures-sdk
+
+# Create a simple trading script
+echo 'import { MexcFuturesClient } from "mexc-futures-sdk";
+
+const client = new MexcFuturesClient({
+  authToken: "WEB_YOUR_TOKEN_HERE" // Get from browser Developer Tools
+});
+
+// Get BTC price
+client.getTicker("BTC_USDT").then(ticker => {
+  console.log("BTC Price:", ticker.data.lastPrice);
+});' > trading-bot.ts
+
+# Run your script
+npx ts-node trading-bot.ts
+```
+
 ## Official Documentation
 
 For official MEXC API documentation, visit: https://mexcdevelop.github.io/apidocs/contract_v1_en/
 
 ## Installation
 
+### Via npm (Recommended)
+
 ```bash
+npm install mexc-futures-sdk
+```
+
+### From Source
+
+```bash
+git clone https://github.com/oboshto/mexc-futures-sdk.git
+cd mexc-futures-sdk
 npm install
 npm run build
 ```
@@ -65,13 +97,33 @@ function mexcCrypto(key, obj) {
 
 ## Usage
 
-```typescript
-import { MexcFuturesSDK } from "mexc-futures-sdk";
+### TypeScript/ES6
 
-const sdk = new MexcFuturesSDK({
+```typescript
+import { MexcFuturesClient, MexcFuturesWebSocket } from "mexc-futures-sdk";
+
+// REST API Client
+const client = new MexcFuturesClient({
   authToken: "WEB_YOUR_TOKEN_HERE", // Browser session token
   timeout: 15000, // Optional: request timeout in milliseconds (default: 30000)
   userAgent: "Mozilla/5.0...", // Optional: custom user agent
+});
+
+// WebSocket Client
+const ws = new MexcFuturesWebSocket({
+  apiKey: "YOUR_API_KEY_HERE", // API Key from MEXC API management
+  secretKey: "YOUR_SECRET_KEY_HERE", // Secret Key from MEXC API management
+  autoReconnect: true,
+});
+```
+
+### CommonJS (Node.js)
+
+```javascript
+const { MexcFuturesClient, MexcFuturesWebSocket } = require("mexc-futures-sdk");
+
+const client = new MexcFuturesClient({
+  authToken: "WEB_YOUR_TOKEN_HERE",
 });
 ```
 
@@ -84,7 +136,7 @@ const sdk = new MexcFuturesSDK({
 Get ticker data for a specific symbol.
 
 ```typescript
-const ticker = await sdk.getTicker("BTC_USDT");
+const ticker = await client.getTicker("BTC_USDT");
 console.log("Price:", ticker.data.lastPrice);
 console.log("24h Change:", `${(ticker.data.riseFallRate * 100).toFixed(2)}%`);
 console.log("Funding Rate:", ticker.data.fundingRate);
@@ -96,7 +148,7 @@ Get contract information. If symbol is provided, returns specific contract; othe
 
 ```typescript
 // Get specific contract
-const btcContract = await sdk.getContractDetail("BTC_USDT");
+const btcContract = await client.getContractDetail("BTC_USDT");
 const contract = Array.isArray(btcContract.data)
   ? btcContract.data[0]
   : btcContract.data;
@@ -104,7 +156,7 @@ console.log("Max Leverage:", contract.maxLeverage + "x");
 console.log("Taker Fee:", (contract.takerFeeRate * 100).toFixed(4) + "%");
 
 // Get all contracts
-const allContracts = await sdk.getContractDetail();
+const allContracts = await client.getContractDetail();
 ```
 
 #### `getContractDepth(symbol: string, limit?: number)`
@@ -112,7 +164,7 @@ const allContracts = await sdk.getContractDetail();
 Get contract's depth information (order book) with bids and asks.
 
 ```typescript
-const depth = await sdk.getContractDepth("BTC_USDT", 10);
+const depth = await client.getContractDepth("BTC_USDT", 10);
 
 // Access order book data
 const asks = depth.asks || depth.data?.asks || [];
@@ -135,7 +187,7 @@ asks.slice(0, 5).forEach(([price, volume, orders]) => {
 Test API connection using public endpoint.
 
 ```typescript
-const isConnected = await sdk.testConnection();
+const isConnected = await client.testConnection();
 console.log("Connected:", isConnected);
 ```
 
@@ -147,7 +199,7 @@ Submit a new futures order.
 
 ```typescript
 // Market order (instant execution)
-const marketOrder = await sdk.submitOrder({
+const marketOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 105000, // price is mandatory even for market orders
   vol: 0.001,
@@ -158,7 +210,7 @@ const marketOrder = await sdk.submitOrder({
 });
 
 // IOC order (Immediate or Cancel)
-const iocOrder = await sdk.submitOrder({
+const iocOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 105000, // limit price
   vol: 0.001,
@@ -169,7 +221,7 @@ const iocOrder = await sdk.submitOrder({
 });
 
 // FOK order (Fill or Kill)
-const fokOrder = await sdk.submitOrder({
+const fokOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 105500,
   vol: 0.001,
@@ -180,7 +232,7 @@ const fokOrder = await sdk.submitOrder({
 });
 
 // Limit order
-const limitOrder = await sdk.submitOrder({
+const limitOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 104000,
   vol: 0.001,
@@ -191,7 +243,7 @@ const limitOrder = await sdk.submitOrder({
 });
 
 // Market order with Stop Loss and Take Profit
-const orderWithSLTP = await sdk.submitOrder({
+const orderWithSLTP = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 105000, // price is mandatory
   vol: 0.001,
@@ -204,7 +256,7 @@ const orderWithSLTP = await sdk.submitOrder({
 });
 
 // Close position order (reduce only)
-const closeOrder = await sdk.submitOrder({
+const closeOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 105000, // price is mandatory
   vol: 0.001,
@@ -216,7 +268,7 @@ const closeOrder = await sdk.submitOrder({
 });
 
 // Order with external ID and hedge mode
-const hedgeOrder = await sdk.submitOrder({
+const hedgeOrder = await client.submitOrder({
   symbol: "BTC_USDT",
   price: 104000,
   vol: 0.001,
@@ -276,7 +328,7 @@ const hedgeOrder = await sdk.submitOrder({
 Cancel orders by order IDs (up to 50 orders at once).
 
 ```typescript
-const cancelResult = await sdk.cancelOrder([12345, 67890]);
+const cancelResult = await client.cancelOrder([12345, 67890]);
 ```
 
 #### `cancelOrderByExternalId(params: CancelOrderByExternalIdRequest)`
@@ -284,7 +336,7 @@ const cancelResult = await sdk.cancelOrder([12345, 67890]);
 Cancel order by external order ID.
 
 ```typescript
-const cancelExternal = await sdk.cancelOrderByExternalId({
+const cancelExternal = await client.cancelOrderByExternalId({
   symbol: "BTC_USDT",
   externalOid: "my-order-123",
 });
@@ -296,12 +348,12 @@ Cancel all orders for a symbol or all orders.
 
 ```typescript
 // Cancel all orders for specific symbol
-const cancelSymbol = await sdk.cancelAllOrders({
+const cancelSymbol = await client.cancelAllOrders({
   symbol: "BTC_USDT",
 });
 
 // Cancel ALL orders (dangerous!)
-const cancelAll = await sdk.cancelAllOrders();
+const cancelAll = await client.cancelAllOrders();
 ```
 
 #### `getOrderHistory(params: OrderHistoryParams)`
@@ -309,7 +361,7 @@ const cancelAll = await sdk.cancelAllOrders();
 Get order history with pagination.
 
 ```typescript
-const history = await sdk.getOrderHistory({
+const history = await client.getOrderHistory({
   category: 1,
   page_num: 1,
   page_size: 20,
@@ -323,7 +375,7 @@ const history = await sdk.getOrderHistory({
 Get transaction details for orders.
 
 ```typescript
-const deals = await sdk.getOrderDeals({
+const deals = await client.getOrderDeals({
   symbol: "BTC_USDT",
   page_num: 1,
   page_size: 20,
@@ -337,7 +389,7 @@ const deals = await sdk.getOrderDeals({
 Get detailed information about a specific order by order ID.
 
 ```typescript
-const orderInfo = await sdk.getOrder("102015012431820288");
+const orderInfo = await client.getOrder("102015012431820288");
 console.log("Order ID:", orderInfo.data.orderId);
 console.log("Symbol:", orderInfo.data.symbol);
 console.log("Side:", orderInfo.data.side); // 1=open long, 2=close short, 3=open short, 4=close long
@@ -375,7 +427,7 @@ console.log("Update Time:", new Date(orderInfo.data.updateTime));
 Get detailed information about a specific order by external order ID.
 
 ```typescript
-const orderInfo = await sdk.getOrderByExternalId(
+const orderInfo = await client.getOrderByExternalId(
   "BTC_USDT",
   "my-external-order-123"
 );
@@ -585,7 +637,7 @@ See `examples/websocket.ts` for a complete working example.
 Get account risk limits.
 
 ```typescript
-const riskLimits = await sdk.getRiskLimit();
+const riskLimits = await client.getRiskLimit();
 console.log("Risk limits:", riskLimits.data.length);
 ```
 
@@ -594,7 +646,7 @@ console.log("Risk limits:", riskLimits.data.length);
 Get trading fee rates for all contracts.
 
 ```typescript
-const feeRates = await sdk.getFeeRate();
+const feeRates = await client.getFeeRate();
 console.log("Fee rates:", feeRates.data.length);
 ```
 
@@ -603,7 +655,7 @@ console.log("Fee rates:", feeRates.data.length);
 Get user's single currency asset information.
 
 ```typescript
-const usdtAsset = await sdk.getAccountAsset("USDT");
+const usdtAsset = await client.getAccountAsset("USDT");
 console.log("Available Balance:", usdtAsset.data.availableBalance);
 console.log("Total Equity:", usdtAsset.data.equity);
 console.log("Position Margin:", usdtAsset.data.positionMargin);
@@ -616,7 +668,7 @@ Get user's current holding positions.
 
 ```typescript
 // Get all open positions
-const allPositions = await sdk.getOpenPositions();
+const allPositions = await client.getOpenPositions();
 console.log("Open positions:", allPositions.data.length);
 
 allPositions.data.forEach((position) => {
@@ -631,13 +683,13 @@ allPositions.data.forEach((position) => {
 });
 
 // Get positions for specific symbol
-const btcPositions = await sdk.getOpenPositions("BTC_USDT");
+const btcPositions = await client.getOpenPositions("BTC_USDT");
 ```
 
 ## Configuration Options
 
 ```typescript
-const sdk = new MexcFuturesSDK({
+const client = new MexcFuturesClient({
   authToken: "WEB_YOUR_TOKEN_HERE", // Required: Browser session token
   baseURL: "https://futures.mexc.com/api/v1", // Optional: API base URL
   timeout: 30000, // Optional: Request timeout in milliseconds
@@ -666,7 +718,7 @@ Please respect MEXC's rate limits:
 
 ```typescript
 try {
-  const order = await sdk.submitOrder({
+  const order = await client.submitOrder({
     symbol: "BTC_USDT",
     side: 1,
     openType: 1,
