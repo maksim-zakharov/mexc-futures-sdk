@@ -77,24 +77,6 @@ npm run build
 5. Find the `authorization` header in the request (starts with "WEB...")
 6. Copy the token value
 
-### Signature Algorithm
-
-The SDK uses MEXC's custom MD5-based signature algorithm:
-
-```javascript
-function mexcCrypto(key, obj) {
-  let timestamp = String(Date.now());
-  let g = md5(key + timestamp).substring(7);
-  let s = JSON.stringify(obj);
-  let signature = md5(timestamp + s + g);
-
-  return {
-    "x-mxc-nonce": timestamp,
-    "x-mxc-sign": signature,
-  };
-}
-```
-
 ## Usage
 
 ### TypeScript/ES6
