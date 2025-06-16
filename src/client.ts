@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { ENDPOINTS } from "./utils/constants";
 import { generateHeaders } from "./utils/headers";
+import { Logger, LogLevelString } from "./utils/logger";
 import {
   OrderHistoryParams,
   OrderHistoryResponse,
@@ -34,14 +35,17 @@ export interface MexcFuturesSDKConfig {
   timeout?: number;
   userAgent?: string;
   customHeaders?: Record<string, string>;
+  logLevel?: LogLevelString;
 }
 
 export class MexcFuturesSDK {
   private httpClient: AxiosInstance;
   private config: MexcFuturesSDKConfig;
+  private logger: Logger;
 
   constructor(config: MexcFuturesSDKConfig) {
     this.config = config;
+    this.logger = new Logger(config.logLevel);
 
     this.httpClient = axios.create({
       baseURL: config.baseURL || "https://futures.mexc.com/api/v1",
@@ -51,13 +55,13 @@ export class MexcFuturesSDK {
 
     // Request interceptor for debugging
     this.httpClient.interceptors.request.use((requestConfig) => {
-      console.log(
+      this.logger.debug(
         `🌐 ${requestConfig.method?.toUpperCase()} ${requestConfig.baseURL}${
           requestConfig.url
         }`
       );
       if (requestConfig.data) {
-        console.log(
+        this.logger.debug(
           "📦 Request body:",
           JSON.stringify(requestConfig.data, null, 2)
         );
@@ -68,15 +72,15 @@ export class MexcFuturesSDK {
     // Response interceptor for debugging
     this.httpClient.interceptors.response.use(
       (response) => {
-        console.log(`✅ ${response.status} ${response.statusText}`);
+        this.logger.debug(`✅ ${response.status} ${response.statusText}`);
         return response;
       },
       (error) => {
         if (error.response) {
-          console.log(
+          this.logger.error(
             `❌ ${error.response.status} ${error.response.statusText}`
           );
-          console.log("Error response:", error.response.data);
+          this.logger.error("Error response:", error.response.data);
         }
         return Promise.reject(error);
       }
@@ -91,9 +95,12 @@ export class MexcFuturesSDK {
     orderParams: SubmitOrderRequest
   ): Promise<SubmitOrderResponse> {
     try {
-      console.log("🚀 Submitting order using /submit endpoint");
+      this.logger.info("🚀 Submitting order using /submit endpoint");
 
-      console.log("📦 Order parameters:", JSON.stringify(orderParams, null, 2));
+      this.logger.debug(
+        "📦 Order parameters:",
+        JSON.stringify(orderParams, null, 2)
+      );
 
       // Generate headers with MEXC signature
       const headers = generateHeaders(
@@ -114,10 +121,10 @@ export class MexcFuturesSDK {
         }
       );
 
-      console.log("🔍 Order response:", response.data);
+      this.logger.debug("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error submitting order:", error);
+      this.logger.error("Error submitting order:", error);
       throw error;
     }
   }
@@ -153,10 +160,10 @@ export class MexcFuturesSDK {
         }
       );
 
-      console.log("🔍 Cancel order response:", response.data);
+      this.logger.debug("🔍 Cancel order response:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error canceling orders:", error);
+      this.logger.error("Error canceling orders:", error);
       throw error;
     }
   }
@@ -187,10 +194,13 @@ export class MexcFuturesSDK {
         }
       );
 
-      console.log("🔍 Cancel order by external ID response:", response.data);
+      this.logger.debug(
+        "🔍 Cancel order by external ID response:",
+        response.data
+      );
       return response.data;
     } catch (error) {
-      console.error("Error canceling order by external ID:", error);
+      this.logger.error("Error canceling order by external ID:", error);
       throw error;
     }
   }
@@ -224,7 +234,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      console.error("Error canceling all orders:", error);
+      this.logger.error("Error canceling all orders:", error);
       throw error;
     }
   }
@@ -241,7 +251,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching order history:", error);
+      this.logger.error("Error fetching order history:", error);
       throw error;
     }
   }
@@ -256,7 +266,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching order deals:", error);
+      this.logger.error("Error fetching order deals:", error);
       throw error;
     }
   }
@@ -271,10 +281,10 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(
         `${ENDPOINTS.GET_ORDER}/${orderId}`
       );
-      console.log("🔍 Order response:", response.data);
+      this.logger.debug("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error fetching order:", error);
+      this.logger.error("Error fetching order:", error);
       throw error;
     }
   }
@@ -295,7 +305,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching order by external ID:", error);
+      this.logger.error("Error fetching order by external ID:", error);
       throw error;
     }
   }
@@ -308,7 +318,7 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(ENDPOINTS.RISK_LIMIT);
       return response.data;
     } catch (error) {
-      console.error("Error fetching risk limit:", error);
+      this.logger.error("Error fetching risk limit:", error);
       throw error;
     }
   }
@@ -321,7 +331,7 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(ENDPOINTS.FEE_RATE);
       return response.data;
     } catch (error) {
-      console.error("Error fetching fee rate:", error);
+      this.logger.error("Error fetching fee rate:", error);
       throw error;
     }
   }
@@ -338,7 +348,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching account asset:", error);
+      this.logger.error("Error fetching account asset:", error);
       throw error;
     }
   }
@@ -356,7 +366,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching open positions:", error);
+      this.logger.error("Error fetching open positions:", error);
       throw error;
     }
   }
@@ -371,7 +381,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching ticker:", error);
+      this.logger.error("Error fetching ticker:", error);
       throw error;
     }
   }
@@ -389,7 +399,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching contract detail:", error);
+      this.logger.error("Error fetching contract detail:", error);
       throw error;
     }
   }
@@ -412,7 +422,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching contract depth:", error);
+      this.logger.error("Error fetching contract depth:", error);
       throw error;
     }
   }
@@ -426,7 +436,7 @@ export class MexcFuturesSDK {
       await this.getTicker("BTC_USDT");
       return true;
     } catch (error) {
-      console.error("Connection test failed:", error);
+      this.logger.error("Connection test failed:", error);
       return false;
     }
   }

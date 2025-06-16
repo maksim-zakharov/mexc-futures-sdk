@@ -87,6 +87,7 @@ const client = new MexcFuturesClient({
   authToken: "WEB_YOUR_TOKEN_HERE", // Browser session token
   timeout: 15000, // Optional: request timeout in milliseconds (default: 30000)
   userAgent: "Mozilla/5.0...", // Optional: custom user agent
+  logLevel: "info", // Optional: 'debug', 'info', 'warn', 'error', 'silent'
 });
 
 // WebSocket Client (requires API Key/Secret)
@@ -94,6 +95,7 @@ const ws = new MexcFuturesWebSocket({
   apiKey: "YOUR_API_KEY_HERE", // API Key from MEXC API management
   secretKey: "YOUR_SECRET_KEY_HERE", // Secret Key from MEXC API management
   autoReconnect: true,
+  logLevel: "info", // Optional: 'debug', 'info', 'warn', 'error', 'silent'
 });
 ```
 
@@ -104,6 +106,7 @@ const { MexcFuturesClient, MexcFuturesWebSocket } = require("mexc-futures-sdk");
 
 const client = new MexcFuturesClient({
   authToken: "WEB_YOUR_TOKEN_HERE",
+  logLevel: "info",
 });
 ```
 
@@ -776,3 +779,27 @@ examples/
 MIT
 
 **USE AT YOUR OWN RISK. THE AUTHORS ARE NOT RESPONSIBLE FOR ANY FINANCIAL LOSSES.**
+
+## Logging
+
+The SDK now includes a configurable logger to control the verbosity of the output. You can set the `logLevel` during client initialization.
+
+- **`debug`**: Most verbose. Shows every request, response, WebSocket message, and internal process.
+- **`info`**: Shows important information like connection status, order submissions, and major events.
+- **`warn`**: Default level. Shows warnings, like WebSocket disconnections or non-critical errors.
+- **`error`**: Shows only critical errors that might break the application flow.
+- **`silent`**: Disables all logging from the SDK.
+
+Example:
+
+```typescript
+const client = new MexcFuturesClient({
+  authToken: "WEB_YOUR_TOKEN_HERE",
+  logLevel: "debug", // Enable verbose logging for development
+});
+
+const productionClient = new MexcFuturesClient({
+  authToken: "WEB_YOUR_TOKEN_HERE",
+  logLevel: "error", // Only log critical errors in production
+});
+```
