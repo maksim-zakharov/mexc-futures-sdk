@@ -1,5 +1,5 @@
-export { MexcFuturesSDK } from "./client";
-export type { MexcFuturesSDKConfig } from "./client";
+export { MexcFuturesSDK as MexcFuturesClient } from "./client";
+export type { MexcFuturesSDKConfig as MexcFuturesClientConfig } from "./client";
 
 // Export WebSocket client
 export { MexcFuturesWebSocket } from "./websocket";

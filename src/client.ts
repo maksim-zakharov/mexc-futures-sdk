@@ -113,6 +113,8 @@ export class MexcFuturesSDK {
           headers,
         }
       );
+
+      console.log("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error submitting order:", error);
@@ -132,10 +134,26 @@ export class MexcFuturesSDK {
         throw new Error("Cannot cancel more than 50 orders at once");
       }
 
-      const response = await this.httpClient.post(
-        ENDPOINTS.CANCEL_ORDER,
+      // Generate headers with MEXC signature for POST request
+      const headers = generateHeaders(
+        {
+          authToken: this.config.authToken,
+          userAgent: this.config.userAgent,
+          customHeaders: this.config.customHeaders,
+        },
+        true,
         orderIds
       );
+
+      const response = await this.httpClient.post(
+        ENDPOINTS.CANCEL_ORDER,
+        orderIds,
+        {
+          headers,
+        }
+      );
+
+      console.log("🔍 Cancel order response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error canceling orders:", error);
@@ -150,10 +168,26 @@ export class MexcFuturesSDK {
     params: CancelOrderByExternalIdRequest
   ): Promise<CancelOrderByExternalIdResponse> {
     try {
-      const response = await this.httpClient.post(
-        ENDPOINTS.CANCEL_ORDER_BY_EXTERNAL_ID,
+      // Generate headers with MEXC signature for POST request
+      const headers = generateHeaders(
+        {
+          authToken: this.config.authToken,
+          userAgent: this.config.userAgent,
+          customHeaders: this.config.customHeaders,
+        },
+        true,
         params
       );
+
+      const response = await this.httpClient.post(
+        ENDPOINTS.CANCEL_ORDER_BY_EXTERNAL_ID,
+        params,
+        {
+          headers,
+        }
+      );
+
+      console.log("🔍 Cancel order by external ID response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error canceling order by external ID:", error);
@@ -169,9 +203,24 @@ export class MexcFuturesSDK {
   ): Promise<CancelAllOrdersResponse> {
     try {
       const payload = params || {};
+
+      // Generate headers with MEXC signature for POST request
+      const headers = generateHeaders(
+        {
+          authToken: this.config.authToken,
+          userAgent: this.config.userAgent,
+          customHeaders: this.config.customHeaders,
+        },
+        true,
+        payload
+      );
+
       const response = await this.httpClient.post(
         ENDPOINTS.CANCEL_ALL_ORDERS,
-        payload
+        payload,
+        {
+          headers,
+        }
       );
       return response.data;
     } catch (error) {
@@ -222,6 +271,7 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(
         `${ENDPOINTS.GET_ORDER}/${orderId}`
       );
+      console.log("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching order:", error);

@@ -115,10 +115,7 @@ export interface SubmitOrderResponse {
   success: boolean;
   code: number;
   message?: string;
-  data?: {
-    orderId?: number;
-    symbol?: string;
-  };
+  data?: number; // Order ID is returned directly as a number
 }
 
 // Get order by ID types

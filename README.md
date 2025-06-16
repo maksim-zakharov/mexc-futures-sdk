@@ -16,8 +16,17 @@
 - ✅ **Full Trading Access** - Complete access to all futures trading functions
 - ✅ **Real-time WebSocket** - Live market data and account updates
 - ✅ **TypeScript Support** - Full type definitions for better development experience
+- ✅ **Proper Authentication** - All POST requests now include MEXC signature
+- ✅ **Correct Order Handling** - Fixed Order ID response format
 
 **Perfect for automated trading systems that need 24/7 reliability!**
+
+## 🔄 Recent Updates (v1.1.0)
+
+- **Fixed Order ID Response**: `submitOrder()` now returns Order ID directly as a number (not as object)
+- **Fixed Authentication**: All POST requests (cancel orders, etc.) now properly signed with MEXC signature
+- **Improved Error Handling**: Better TypeScript error type checking
+- **Renamed Exports**: `MexcFuturesSDK` → `MexcFuturesClient` for better naming consistency
 
 ---
 
@@ -91,7 +100,7 @@ const client = new MexcFuturesClient({
   userAgent: "Mozilla/5.0...", // Optional: custom user agent
 });
 
-// WebSocket Client
+// WebSocket Client (requires API Key/Secret)
 const ws = new MexcFuturesWebSocket({
   apiKey: "YOUR_API_KEY_HERE", // API Key from MEXC API management
   secretKey: "YOUR_SECRET_KEY_HERE", // Secret Key from MEXC API management
@@ -177,7 +186,7 @@ console.log("Connected:", isConnected);
 
 #### `submitOrder(params: SubmitOrderRequest)`
 
-Submit a new futures order.
+Submit a new futures order. Returns Order ID directly as a number.
 
 ```typescript
 // Market order (instant execution)
@@ -190,6 +199,12 @@ const marketOrder = await client.submitOrder({
   openType: 1, // 1 = isolated margin
   leverage: 10, // required for isolated margin
 });
+
+// Order ID is returned directly as a number
+if (marketOrder.success && marketOrder.data) {
+  const orderId = marketOrder.data; // number, not object
+  console.log("Order ID:", orderId);
+}
 
 // IOC order (Immediate or Cancel)
 const iocOrder = await client.submitOrder({

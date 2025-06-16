@@ -1,8 +1,8 @@
-import { MexcFuturesSDK } from "../src/index";
+import { MexcFuturesClient } from "../src/index";
 
 async function main() {
   // Replace with your actual WEB token from browser
-  const sdk = new MexcFuturesSDK({
+  const client = new MexcFuturesClient({
     authToken: "WEB_YOUR_TOKEN_HERE", // Get from browser Developer Tools
     timeout: 15000, // Optional: request timeout in milliseconds
   });
@@ -10,7 +10,7 @@ async function main() {
   try {
     // Test connection
     console.log("🔌 Testing connection...");
-    const isConnected = await sdk.testConnection();
+    const isConnected = await client.testConnection();
     console.log("Connection:", isConnected ? "✅ SUCCESS" : "❌ FAILED");
 
     if (!isConnected) {
@@ -25,7 +25,7 @@ async function main() {
     for (const symbol of symbols) {
       try {
         console.log(`\n🔍 ${symbol}:`);
-        const ticker = await sdk.getTicker(symbol);
+        const ticker = await client.getTicker(symbol);
 
         console.log(`  💰 Price: $${ticker.data?.lastPrice}`);
         console.log(
@@ -41,14 +41,18 @@ async function main() {
         );
         console.log(`  💸 Funding Rate: ${ticker.data?.fundingRate}`);
       } catch (error) {
-        console.log(`  ❌ Failed to fetch ${symbol}: ${error.message}`);
+        console.log(
+          `  ❌ Failed to fetch ${symbol}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     }
 
     // Get contract details
     console.log("\n📋 Fetching contract details...");
     try {
-      const btcContract = await sdk.getContractDetail("BTC_USDT");
+      const btcContract = await client.getContractDetail("BTC_USDT");
       if (btcContract.data) {
         // Handle both single object and array responses
         const contract = Array.isArray(btcContract.data)
@@ -68,13 +72,17 @@ async function main() {
         console.log(`   Max Volume: ${contract.maxVol.toLocaleString()}`);
       }
     } catch (error) {
-      console.log(`❌ Contract details failed: ${error.message}`);
+      console.log(
+        `❌ Contract details failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // Get order book depth
     console.log("\n📊 Fetching order book depth...");
     try {
-      const depth = await sdk.getContractDepth("BTC_USDT", 5);
+      const depth = await client.getContractDepth("BTC_USDT", 5);
 
       // Handle different response formats
       const asks = depth.asks || depth.data?.asks || [];
@@ -88,38 +96,54 @@ async function main() {
         console.log(`   Depth: ${asks.length} asks, ${bids.length} bids`);
       }
     } catch (error) {
-      console.log(`❌ Order book depth failed: ${error.message}`);
+      console.log(
+        `❌ Order book depth failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // Get account information (requires valid auth)
     console.log("\n🛡️ Fetching account info...");
 
     try {
-      const riskLimits = await sdk.getRiskLimit();
+      const riskLimits = await client.getRiskLimit();
       console.log(`✅ Risk limits: ${riskLimits.data?.length || 0} contracts`);
     } catch (error) {
-      console.log(`❌ Risk limits failed: ${error.message}`);
+      console.log(
+        `❌ Risk limits failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     try {
-      const feeRates = await sdk.getFeeRate();
+      const feeRates = await client.getFeeRate();
       console.log(`✅ Fee rates: ${feeRates.data?.length || 0} contracts`);
     } catch (error) {
-      console.log(`❌ Fee rates failed: ${error.message}`);
+      console.log(
+        `❌ Fee rates failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     try {
-      const usdtAsset = await sdk.getAccountAsset("USDT");
+      const usdtAsset = await client.getAccountAsset("USDT");
       console.log(
         `✅ USDT balance: ${usdtAsset.data?.availableBalance || 0} USDT`
       );
       console.log(`   Total equity: ${usdtAsset.data?.equity || 0} USDT`);
     } catch (error) {
-      console.log(`❌ Account asset failed: ${error.message}`);
+      console.log(
+        `❌ Account asset failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     try {
-      const positions = await sdk.getOpenPositions();
+      const positions = await client.getOpenPositions();
       console.log(`✅ Open positions: ${positions.data?.length || 0}`);
 
       if (positions.data && positions.data.length > 0) {
@@ -135,13 +159,17 @@ async function main() {
         });
       }
     } catch (error) {
-      console.log(`❌ Open positions failed: ${error.message}`);
+      console.log(
+        `❌ Open positions failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // Get order history
     console.log("\n📋 Fetching order history...");
     try {
-      const orderHistory = await sdk.getOrderHistory({
+      const orderHistory = await client.getOrderHistory({
         category: 1,
         page_num: 1,
         page_size: 5,
@@ -152,13 +180,17 @@ async function main() {
         `✅ Order history: ${orderHistory.data?.orders?.length || 0} orders`
       );
     } catch (error) {
-      console.log(`❌ Order history failed: ${error.message}`);
+      console.log(
+        `❌ Order history failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // Get order deals
     console.log("\n💼 Fetching order deals...");
     try {
-      const orderDeals = await sdk.getOrderDeals({
+      const orderDeals = await client.getOrderDeals({
         symbol: "CAKE_USDT",
         page_num: 1,
         page_size: 5,
@@ -167,7 +199,11 @@ async function main() {
         `✅ Order deals: ${orderDeals.data?.length || 0} transactions`
       );
     } catch (error) {
-      console.log(`❌ Order deals failed: ${error.message}`);
+      console.log(
+        `❌ Order deals failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     // Get specific order information (example with a test order ID)
@@ -177,7 +213,7 @@ async function main() {
       const testOrderId = "102015012431820288"; // Example order ID
       console.log(`   Attempting to fetch order: ${testOrderId}`);
 
-      const orderInfo = await sdk.getOrder(testOrderId);
+      const orderInfo = await client.getOrder(testOrderId);
       if (orderInfo.success && orderInfo.data) {
         console.log(`✅ Order ${orderInfo.data.orderId}:`);
         console.log(`   Symbol: ${orderInfo.data.symbol}`);
@@ -205,7 +241,11 @@ async function main() {
         console.log(`   Updated: ${new Date(orderInfo.data.updateTime)}`);
       }
     } catch (error) {
-      console.log(`❌ Get order failed: ${error.message}`);
+      console.log(
+        `❌ Get order failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       console.log(
         "   Note: Replace testOrderId with a real order ID from your history"
       );
@@ -221,7 +261,7 @@ async function main() {
         `   Attempting to fetch order: ${testSymbol} / ${testExternalOid}`
       );
 
-      const orderByExternal = await sdk.getOrderByExternalId(
+      const orderByExternal = await client.getOrderByExternalId(
         testSymbol,
         testExternalOid
       );
@@ -250,7 +290,11 @@ async function main() {
         console.log(`   Updated: ${new Date(orderByExternal.data.updateTime)}`);
       }
     } catch (error) {
-      console.log(`❌ Get order by external ID failed: ${error.message}`);
+      console.log(
+        `❌ Get order by external ID failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       console.log(
         "   Note: Replace testExternalOid with a real external order ID from your history"
       );
@@ -264,10 +308,10 @@ async function main() {
     /*
     // Example 1: Market order (instant execution)
     console.log("🎯 Market Order Example:");
-    const ticker = await sdk.getTicker("CAKE_USDT");
+    const ticker = await client.getTicker("CAKE_USDT");
     const currentPrice = ticker.data.lastPrice;
     
-    const marketOrder = await sdk.submitOrder({
+    const marketOrder = await client.submitOrder({
       symbol: "CAKE_USDT",
       price: currentPrice, // price is mandatory even for market orders
       vol: 5, // volume in tokens
@@ -283,7 +327,7 @@ async function main() {
     const iocPrice = ask * 1.005; // +0.5% from ask
 
     console.log("⚡ IOC Order Example:");
-    const iocOrder = await sdk.submitOrder({
+    const iocOrder = await client.submitOrder({
       symbol: "CAKE_USDT",
       price: iocPrice,
       vol: 5,
@@ -298,7 +342,7 @@ async function main() {
     const fokPrice = ask * 1.01; // +1% from ask
 
     console.log("🎯 FOK Order Example:");
-    const fokOrder = await sdk.submitOrder({
+    const fokOrder = await client.submitOrder({
       symbol: "CAKE_USDT",
       price: fokPrice,
       vol: 5,
@@ -311,7 +355,7 @@ async function main() {
 
     // Example 4: Limit order with Stop Loss and Take Profit
     console.log("📈 Limit Order with SL/TP Example:");
-    const limitOrder = await sdk.submitOrder({
+    const limitOrder = await client.submitOrder({
       symbol: "CAKE_USDT",
       price: currentPrice * 0.98, // limit price 2% below current
       vol: 5,
@@ -328,7 +372,7 @@ async function main() {
     // Example 5: Cancel orders
     if (marketOrder.success && marketOrder.data?.orderId) {
       console.log("🗑️ Canceling test order...");
-      const cancelResult = await sdk.cancelOrder([marketOrder.data.orderId]);
+      const cancelResult = await client.cancelOrder([marketOrder.data.orderId]);
       console.log("Cancel result:", cancelResult);
     }
     */
@@ -357,10 +401,14 @@ async function main() {
     console.log("   positionMode: 1=hedge, 2=one-way");
     console.log("   reduceOnly: For one-way positions only (boolean)");
   } catch (error) {
-    console.error("❌ Error:", error.message);
-    if (error.response) {
-      console.error("   Status:", error.response.status);
-      console.error("   Data:", error.response.data);
+    console.error(
+      "❌ Error:",
+      error instanceof Error ? error.message : String(error)
+    );
+    if (error && typeof error === "object" && "response" in error) {
+      const axiosError = error as any;
+      console.error("   Status:", axiosError.response?.status);
+      console.error("   Data:", axiosError.response?.data);
     }
   }
 }
