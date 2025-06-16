@@ -16,19 +16,8 @@
 - ✅ **Full Trading Access** - Complete access to all futures trading functions
 - ✅ **Real-time WebSocket** - Live market data and account updates
 - ✅ **TypeScript Support** - Full type definitions for better development experience
-- ✅ **Proper Authentication** - All POST requests now include MEXC signature
-- ✅ **Correct Order Handling** - Fixed Order ID response format
 
 **Perfect for automated trading systems that need 24/7 reliability!**
-
-## 🔄 Recent Updates (v1.1.0)
-
-- **Fixed Order ID Response**: `submitOrder()` now returns Order ID directly as a number (not as object)
-- **Fixed Authentication**: All POST requests (cancel orders, etc.) now properly signed with MEXC signature
-- **Improved Error Handling**: Better TypeScript error type checking
-- **Renamed Exports**: `MexcFuturesSDK` → `MexcFuturesClient` for better naming consistency
-
----
 
 SDK for MEXC Futures trading using web-based authentication (browser session tokens).
 
