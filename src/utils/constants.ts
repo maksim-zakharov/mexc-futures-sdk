@@ -14,6 +14,7 @@ export const ENDPOINTS = {
   FEE_RATE: "/private/account/contract/fee_rate",
   ACCOUNT_ASSET: "/private/account/asset",
   OPEN_POSITIONS: "/private/position/open_positions",
+  POSITION_HISTORY: "/private/position/list/history_positions",
 
   // Public endpoints (no authentication required)
   TICKER: "/contract/ticker",

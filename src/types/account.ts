@@ -64,3 +64,17 @@ export interface OpenPositionsResponse {
   code: number;
   data: Position[];
 }
+
+export interface PositionHistoryParams {
+  symbol?: string; // Optional: the name of the contract
+  type?: 1 | 2; // Optional: position type, 1=long, 2=short
+  page_num: number; // Required: current page number, default is 1
+  page_size: number; // Required: page size, default 20, maximum 100
+}
+
+export interface PositionHistoryResponse {
+  success: boolean;
+  code: number;
+  message: string;
+  data: Position[];
+}

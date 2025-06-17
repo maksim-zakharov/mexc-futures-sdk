@@ -653,26 +653,79 @@ console.log("Unrealized P&L:", usdtAsset.data.unrealized);
 
 #### `getOpenPositions(symbol?: string)`
 
-Get user's current holding positions.
+Get user's current open positions.
 
 ```typescript
 // Get all open positions
 const allPositions = await client.getOpenPositions();
-console.log("Open positions:", allPositions.data.length);
+console.log(`Open positions: ${allPositions.data.length}`);
 
-allPositions.data.forEach((position) => {
+// Get positions for a specific symbol
+const btcPositions = await client.getOpenPositions("BTC_USDT");
+if (btcPositions.data.length > 0) {
+  const position = btcPositions.data[0];
   console.log(
-    `${position.symbol}: ${position.positionType === 1 ? "LONG" : "SHORT"}`
+    `BTC position: ${position.holdVol} contracts @ $${position.openAvgPrice}`
   );
-  console.log(`  Volume: ${position.holdVol}`);
-  console.log(`  Avg Price: $${position.holdAvgPrice}`);
-  console.log(`  Liquidation: $${position.liquidatePrice}`);
-  console.log(`  PnL: ${position.realised} USDT`);
-  console.log(`  Leverage: ${position.leverage}x`);
+  console.log(`Unrealized PnL: ${position.unrealizedPnL}`);
+  console.log(`Leverage: ${position.leverage}x`);
+}
+```
+
+#### `getPositionHistory(params: PositionHistoryParams)`
+
+Get user's history position information.
+
+```typescript
+// Get position history with pagination
+const positionHistory = await client.getPositionHistory({
+  page_num: 1,
+  page_size: 20,
+  symbol: "BTC_USDT", // Optional: filter by symbol
+  type: 1, // Optional: 1=long, 2=short
 });
 
-// Get positions for specific symbol
-const btcPositions = await client.getOpenPositions("BTC_USDT");
+console.log(`Position history: ${positionHistory.data.length} positions`);
+
+// Display position details
+if (positionHistory.data.length > 0) {
+  positionHistory.data.forEach((position) => {
+    const side = position.positionType === 1 ? "LONG" : "SHORT";
+    const margin = position.openType === 1 ? "ISOLATED" : "CROSS";
+    const status = position.state === 3 ? "CLOSED" : "HOLDING";
+
+    console.log(`${position.symbol} ${side} (${margin}): ${status}`);
+    console.log(`  Volume: ${position.holdVol} @ $${position.openAvgPrice}`);
+    console.log(`  Realized PnL: ${position.realised}`);
+    console.log(`  Leverage: ${position.leverage}x`);
+    console.log(`  Created: ${new Date(position.createTime).toLocaleString()}`);
+  });
+}
+```
+
+**Position History Parameters:**
+
+- `page_num: number` - Current page number (default: 1)
+- `page_size: number` - Page size (default: 20, maximum: 100)
+- `symbol?: string` - Optional: Filter by contract symbol
+- `type?: 1 | 2` - Optional: Position type (1=long, 2=short)
+
+**Position State Values:**
+
+- `1` - Holding
+- `2` - System auto-holding
+- `3` - Closed
+
+#### `getAccountAsset(currency: string)`
+
+Get account asset information for a specific currency.
+
+```typescript
+const usdtAsset = await client.getAccountAsset("USDT");
+console.log("Available balance:", usdtAsset.data.availableBalance, "USDT");
+console.log("Total equity:", usdtAsset.data.equity, "USDT");
+console.log("Unrealized PnL:", usdtAsset.data.unrealized, "USDT");
+console.log("Position margin:", usdtAsset.data.positionMargin, "USDT");
 ```
 
 ## Configuration Options

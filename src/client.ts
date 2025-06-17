@@ -22,6 +22,8 @@ import {
   AccountResponse,
   AccountAssetResponse,
   OpenPositionsResponse,
+  PositionHistoryParams,
+  PositionHistoryResponse,
 } from "./types/account";
 import {
   TickerResponse,
@@ -367,6 +369,25 @@ export class MexcFuturesSDK {
       return response.data;
     } catch (error) {
       this.logger.error("Error fetching open positions:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user's history position information
+   * @param params Parameters for filtering position history
+   * @returns List of historical positions
+   */
+  async getPositionHistory(
+    params: PositionHistoryParams
+  ): Promise<PositionHistoryResponse> {
+    try {
+      const response = await this.httpClient.get(ENDPOINTS.POSITION_HISTORY, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error("Error fetching position history:", error);
       throw error;
     }
   }
