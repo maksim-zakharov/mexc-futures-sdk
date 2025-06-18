@@ -35,12 +35,25 @@ export interface FilterParams {
   }>;
 }
 
+export type KLineInterval =
+  | "Min1"
+  | "Min5"
+  | "Min15"
+  | "Min30"
+  | "Min60"
+  | "Hour4"
+  | "Hour8"
+  | "Day1"
+  | "Week1"
+  | "Month1";
+
 export interface WebSocketMessage {
   method?: string;
   channel?: string;
   data?: any;
   param?: any;
   subscribe?: boolean;
+  gzip?: boolean;
 }
 
 export class MexcFuturesWebSocket extends EventEmitter {
@@ -183,6 +196,8 @@ export class MexcFuturesWebSocket extends EventEmitter {
     this.send(filterMessage);
   }
 
+  // ==================== PRIVATE DATA SUBSCRIPTIONS ====================
+
   /**
    * Subscribe to specific order updates for symbols
    */
@@ -255,6 +270,262 @@ export class MexcFuturesWebSocket extends EventEmitter {
     this.setPersonalFilter([]);
   }
 
+  // ==================== PUBLIC DATA SUBSCRIPTIONS ====================
+
+  /**
+   * Subscribe to all tickers (all contracts)
+   * @param gzip - Whether to compress the data (default: false)
+   */
+  subscribeToAllTickers(gzip: boolean = false): void {
+    const message: WebSocketMessage = {
+      method: "sub.tickers",
+      param: {},
+      gzip,
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from all tickers
+   */
+  unsubscribeFromAllTickers(): void {
+    const message: WebSocketMessage = {
+      method: "unsub.tickers",
+      param: {},
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to ticker for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  subscribeToTicker(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "sub.ticker",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from ticker for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromTicker(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.ticker",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to trades for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  subscribeToDeals(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "sub.deal",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from trades for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromDeals(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.deal",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to incremental depth for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   * @param compress - Whether to compress the data (default: false)
+   */
+  subscribeToDepth(symbol: string, compress: boolean = false): void {
+    const message: WebSocketMessage = {
+      method: "sub.depth",
+      param: {
+        symbol,
+        compress,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to full depth for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   * @param limit - Depth limit (5, 10, or 20)
+   */
+  subscribeToFullDepth(symbol: string, limit: 5 | 10 | 20 = 20): void {
+    const message: WebSocketMessage = {
+      method: "sub.depth.full",
+      param: {
+        symbol,
+        limit,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from incremental depth for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromDepth(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.depth",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from full depth for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromFullDepth(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "usub.depth.full",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to kline/candlestick data for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   * @param interval - Kline interval
+   */
+  subscribeToKline(symbol: string, interval: KLineInterval): void {
+    const message: WebSocketMessage = {
+      method: "sub.kline",
+      param: {
+        symbol,
+        interval,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from kline/candlestick data for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromKline(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.kline",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to funding rate for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  subscribeToFundingRate(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "sub.funding.rate",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from funding rate for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromFundingRate(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.funding.rate",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to index price for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  subscribeToIndexPrice(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "sub.index.price",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from index price for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromIndexPrice(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.index.price",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Subscribe to fair price for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  subscribeToFairPrice(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "sub.fair.price",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
+  /**
+   * Unsubscribe from fair price for specific contract
+   * @param symbol - Contract symbol (e.g., "BTC_USDT")
+   */
+  unsubscribeFromFairPrice(symbol: string): void {
+    const message: WebSocketMessage = {
+      method: "unsub.fair.price",
+      param: {
+        symbol,
+      },
+    };
+    this.send(message);
+  }
+
   /**
    * Send message to WebSocket
    */
@@ -314,6 +585,22 @@ export class MexcFuturesWebSocket extends EventEmitter {
       return;
     }
 
+    // Handle subscription confirmations
+    if (message.channel?.startsWith("rs.sub.")) {
+      const streamType = message.channel.replace("rs.sub.", "");
+      this.logger.info(`✅ Subscribed to ${streamType}`);
+      this.emit("subscribed", { type: streamType, data: message.data });
+      return;
+    }
+
+    // Handle unsubscription confirmations
+    if (message.channel?.startsWith("rs.unsub.")) {
+      const streamType = message.channel.replace("rs.unsub.", "");
+      this.logger.info(`✅ Unsubscribed from ${streamType}`);
+      this.emit("unsubscribed", { type: streamType, data: message.data });
+      return;
+    }
+
     // Handle error responses
     if (message.channel === "rs.error") {
       this.logger.error("❌ WebSocket error response:", message.data);
@@ -322,15 +609,16 @@ export class MexcFuturesWebSocket extends EventEmitter {
     }
 
     // Handle private data updates
-    this.handlePrivateDataUpdate(message);
+    this.handleDataUpdate(message);
   }
 
   /**
-   * Handle private data updates (orders, positions, etc.)
+   * Handle data updates (orders, positions, market data, etc.)
    */
-  private handlePrivateDataUpdate(message: WebSocketMessage): void {
-    const { method, data } = message;
+  private handleDataUpdate(message: WebSocketMessage): void {
+    const { channel, method, data } = message;
 
+    // Handle private data updates
     switch (method) {
       case "order.update":
         this.emit("orderUpdate", data);
@@ -359,8 +647,39 @@ export class MexcFuturesWebSocket extends EventEmitter {
       case "stop.planorder":
         this.emit("stopPlanOrder", data);
         break;
+    }
+
+    // Handle public data updates
+    switch (channel) {
+      case "push.tickers":
+        this.emit("tickers", data);
+        break;
+      case "push.ticker":
+        this.emit("ticker", data);
+        break;
+      case "push.deal":
+        this.emit("deal", data);
+        break;
+      case "push.depth":
+        this.emit("depth", data);
+        break;
+      case "push.kline":
+        this.emit("kline", data);
+        break;
+      case "push.funding.rate":
+        this.emit("fundingRate", data);
+        break;
+      case "push.index.price":
+        this.emit("indexPrice", data);
+        break;
+      case "push.fair.price":
+        this.emit("fairPrice", data);
+        break;
       default:
-        this.emit("message", message);
+        if (!method) {
+          // If no method is specified and not handled by channel cases above
+          this.emit("message", message);
+        }
         break;
     }
   }

@@ -438,7 +438,7 @@ This method is useful when you track orders using your own external IDs and need
 
 ## WebSocket API (Real-time Updates)
 
-The SDK includes a WebSocket client for real-time updates of orders, positions, balances, and other account data. This is much more efficient than polling REST endpoints.
+The SDK includes a WebSocket client for real-time updates of orders, positions, balances, market data and other information. This is much more efficient than polling REST endpoints.
 
 ### Basic WebSocket Usage
 
@@ -469,7 +469,7 @@ ws.on("disconnected", ({ code, reason }) =>
 ws.on("login", (data) => console.log("Login successful:", data));
 ws.on("loginError", (error) => console.error("Login failed:", error));
 
-// Data events
+// Private data events
 ws.on("orderUpdate", (data) => console.log("Order update:", data));
 ws.on("orderDeal", (data) => console.log("Order execution:", data));
 ws.on("positionUpdate", (data) => console.log("Position update:", data));
@@ -477,11 +477,21 @@ ws.on("assetUpdate", (data) => console.log("Balance update:", data));
 ws.on("adlLevel", (data) => console.log("ADL level update:", data));
 ws.on("riskLimit", (data) => console.log("Risk limit update:", data));
 
+// Public market data events
+ws.on("tickers", (data) => console.log("All tickers update:", data));
+ws.on("ticker", (data) => console.log("Ticker update:", data));
+ws.on("deal", (data) => console.log("Trade update:", data));
+ws.on("depth", (data) => console.log("Depth update:", data));
+ws.on("kline", (data) => console.log("Kline update:", data));
+ws.on("fundingRate", (data) => console.log("Funding rate update:", data));
+ws.on("indexPrice", (data) => console.log("Index price update:", data));
+ws.on("fairPrice", (data) => console.log("Fair price update:", data));
+
 // Ping/pong
 ws.on("pong", (timestamp) => console.log("Pong:", new Date(timestamp)));
 ```
 
-### Subscription Methods
+### Private Data Subscriptions
 
 #### Subscribe to Orders
 
@@ -550,14 +560,248 @@ ws.subscribeToMultiple([
 ]);
 ```
 
-#### Subscribe to All Data
+#### Subscribe to All Private Data
 
 ```typescript
 // Subscribe to all available private data
 ws.subscribeToAll();
 ```
 
-### Available Filters
+### Public Market Data Subscriptions
+
+#### Subscribe to All Tickers
+
+```typescript
+// Subscribe to all tickers (all contracts)
+ws.subscribeToAllTickers();
+
+// Unsubscribe from all tickers
+ws.unsubscribeFromAllTickers();
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.tickers",
+  "data": [
+    {
+      "fairPrice": 183.01,
+      "lastPrice": 183,
+      "riseFallRate": -0.0708,
+      "symbol": "BSV_USDT",
+      "volume24": 200
+    },
+    // More tickers...
+  ],
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Ticker (Single Contract)
+
+```typescript
+// Subscribe to ticker for specific contract
+ws.subscribeToTicker("BTC_USDT");
+
+// Unsubscribe from ticker
+ws.unsubscribeFromTicker("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.ticker",
+  "data": {
+    "ask1": 6866.5,
+    "bid1": 6865,
+    "fairPrice": 6867.4,
+    "fundingRate": 0.0008,
+    "high24Price": 7223.5,
+    "indexPrice": 6861.6,
+    "lastPrice": 6865.5,
+    "lower24Price": 6756,
+    "riseFallRate": -0.0424,
+    "symbol": "BTC_USDT",
+    "timestamp": 1587442022003,
+    "holdVol": 2284742,
+    "volume24": 164586129
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Trades
+
+```typescript
+// Subscribe to trades for specific contract
+ws.subscribeToDeals("BTC_USDT");
+
+// Unsubscribe from trades
+ws.unsubscribeFromDeals("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.deal",
+  "data": {
+    "M": 1, // Is auto-transact? 1=Yes, 2=No
+    "O": 1, // Open position: 1=open, 2=close, 3=no change
+    "T": 1, // Direction: 1=buy, 2=sell
+    "p": 6866.5, // Price
+    "t": 1587442049632, // Timestamp
+    "v": 2096 // Volume
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Depth (Order Book)
+
+```typescript
+// Subscribe to incremental depth
+ws.subscribeToDepth("BTC_USDT", false); // false = no compression
+
+// Subscribe to incremental depth with compression
+ws.subscribeToDepth("BTC_USDT", true);
+
+// Subscribe to full depth with limit
+ws.subscribeToFullDepth("BTC_USDT", 20); // 5, 10, or 20 levels
+
+// Unsubscribe
+ws.unsubscribeFromDepth("BTC_USDT");
+ws.unsubscribeFromFullDepth("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.depth",
+  "data": {
+    "asks": [
+      [6859.5, 3251, 1] // [price, order quantity, order count]
+    ],
+    "bids": [],
+    "version": 96801927
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Klines (Candlestick)
+
+```typescript
+// Subscribe to kline data
+ws.subscribeToKline("BTC_USDT", "Min1"); // 1-minute candles
+
+// Available intervals:
+// "Min1", "Min5", "Min15", "Min30", "Min60", "Hour4", "Hour8", "Day1", "Week1", "Month1"
+
+// Unsubscribe
+ws.unsubscribeFromKline("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.kline",
+  "data": {
+    "a": 233.740269343644737245, // Total amount
+    "c": 6885, // Close price
+    "h": 6910.5, // High price
+    "interval": "Min60", // Interval
+    "l": 6885, // Low price
+    "o": 6894.5, // Open price
+    "q": 1611754, // Volume
+    "symbol": "BTC_USDT",
+    "t": 1587448800 // Timestamp (seconds)
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Funding Rate
+
+```typescript
+// Subscribe to funding rate
+ws.subscribeToFundingRate("BTC_USDT");
+
+// Unsubscribe
+ws.unsubscribeFromFundingRate("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.funding.rate",
+  "data": {
+    "rate": 0.001,
+    "symbol": "BTC_USDT"
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Index Price
+
+```typescript
+// Subscribe to index price
+ws.subscribeToIndexPrice("BTC_USDT");
+
+// Unsubscribe
+ws.unsubscribeFromIndexPrice("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.index.price",
+  "data": {
+    "price": 6861.6,
+    "symbol": "BTC_USDT"
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+#### Subscribe to Fair Price
+
+```typescript
+// Subscribe to fair price
+ws.subscribeToFairPrice("BTC_USDT");
+
+// Unsubscribe
+ws.unsubscribeFromFairPrice("BTC_USDT");
+```
+
+Response format:
+
+```javascript
+{
+  "channel": "push.fair.price",
+  "data": {
+    "price": 6867.4,
+    "symbol": "BTC_USDT"
+  },
+  "symbol": "BTC_USDT",
+  "ts": 1587442022003
+}
+```
+
+### Available Private Data Filters
 
 - `order` - Order status updates (supports symbol filtering)
 - `order.deal` - Order executions/fills (supports symbol filtering)
@@ -578,6 +822,7 @@ const ws = new MexcFuturesWebSocket({
   autoReconnect: true, // Optional: Auto-reconnect on disconnect (default: true)
   reconnectInterval: 5000, // Optional: Reconnect delay in ms (default: 5000)
   pingInterval: 15000, // Optional: Ping interval in ms (default: 15000)
+  logLevel: "INFO", // Optional: Log level (default: "INFO")
 });
 ```
 
@@ -616,7 +861,6 @@ See `examples/websocket.ts` for a complete working example.
 
 - WebSocket requires API Key and Secret Key from MEXC API management (different from REST API WEB token)
 - WebSocket uses HMAC SHA256 signature: `HMAC-SHA256(apiKey + timestamp, secretKey)`
-- Although MEXC docs mention simple concatenation, HMAC signature is required in practice
 - Connection will be closed if no ping is received within 1 minute
 - Auto-reconnection is enabled by default
 - All private data is pushed by default after login unless `subscribe: false` is used
