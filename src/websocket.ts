@@ -557,8 +557,8 @@ export class MexcFuturesWebSocket extends EventEmitter {
     }
 
     // Handle login response
-    if (message.method === "login" && message.channel === "rs.login") {
-      if (message.data?.code === 0) {
+    if (message.channel === "rs.login") {
+      if (message.data === "success" || message.data?.code === 0) {
         this.isLoggedIn = true;
         this.logger.info("✅ WebSocket login successful");
         this.emit("login", message);
@@ -571,11 +571,8 @@ export class MexcFuturesWebSocket extends EventEmitter {
     }
 
     // Handle filter response
-    if (
-      message.method === "personal.filter" &&
-      message.channel === "rs.personal.filter"
-    ) {
-      if (message.data?.code === 0) {
+    if (message.channel === "rs.personal.filter") {
+      if (message.data === "success" || message.data?.code === 0) {
         this.logger.info("✅ WebSocket filter set successfully");
         this.emit("filter_set", message.data);
       } else {
@@ -616,38 +613,7 @@ export class MexcFuturesWebSocket extends EventEmitter {
    * Handle data updates (orders, positions, market data, etc.)
    */
   private handleDataUpdate(message: WebSocketMessage): void {
-    const { channel, method, data } = message;
-
-    // Handle private data updates
-    switch (method) {
-      case "order.update":
-        this.emit("orderUpdate", data);
-        break;
-      case "order.deal":
-        this.emit("orderDeal", data);
-        break;
-      case "position.update":
-        this.emit("positionUpdate", data);
-        break;
-      case "asset.update":
-        this.emit("assetUpdate", data);
-        break;
-      case "adl.level":
-        this.emit("adlLevel", data);
-        break;
-      case "risk.limit":
-        this.emit("riskLimit", data);
-        break;
-      case "plan.order":
-        this.emit("planOrder", data);
-        break;
-      case "stop.order":
-        this.emit("stopOrder", data);
-        break;
-      case "stop.planorder":
-        this.emit("stopPlanOrder", data);
-        break;
-    }
+    const { channel, data } = message;
 
     // Handle public data updates
     switch (channel) {
@@ -675,11 +641,44 @@ export class MexcFuturesWebSocket extends EventEmitter {
       case "push.fair.price":
         this.emit("fairPrice", data);
         break;
+
+      // Handle private data updates with push.personal.* channels
+      case "push.personal.order":
+        this.emit("orderUpdate", data);
+        break;
+      case "push.personal.order.deal":
+        this.emit("orderDeal", data);
+        break;
+      case "push.personal.position":
+        this.emit("positionUpdate", data);
+        break;
+      case "push.personal.asset":
+        this.emit("assetUpdate", data);
+        break;
+      case "push.personal.stop.order":
+        this.emit("stopOrder", data);
+        break;
+      case "push.personal.stop.planorder":
+        this.emit("stopPlanOrder", data);
+        break;
+      case "push.personal.liquidate.risk":
+        this.emit("liquidateRisk", data);
+        break;
+      case "push.personal.adl.level":
+        this.emit("adlLevel", data);
+        break;
+      case "push.personal.risk.limit":
+        this.emit("riskLimit", data);
+        break;
+      case "push.personal.plan.order":
+        this.emit("planOrder", data);
+        break;
+
       default:
-        if (!method) {
-          // If no method is specified and not handled by channel cases above
-          this.emit("message", message);
-        }
+        // If not handled by any case above, emit as generic message
+        // Uncomment for debugging unhandled messages
+        // console.log("📥 Other message detected:", JSON.stringify(message, null, 2));
+        this.emit("message", message);
         break;
     }
   }
