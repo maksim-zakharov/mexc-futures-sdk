@@ -9,6 +9,19 @@ export type {
   WebSocketMessage,
 } from "./websocket";
 
+// Export error classes
+export {
+  MexcFuturesError,
+  MexcAuthenticationError,
+  MexcApiError,
+  MexcNetworkError,
+  MexcValidationError,
+  MexcSignatureError,
+  MexcRateLimitError,
+  parseAxiosError,
+  formatErrorForLogging,
+} from "./utils/errors";
+
 // Export types
 export * from "./types/orders";
 export * from "./types/account";

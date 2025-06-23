@@ -20,6 +20,20 @@ export class Logger {
     }
   }
 
+  /**
+   * Get current log level
+   */
+  getLevel(): LogLevel {
+    return this.level;
+  }
+
+  /**
+   * Check if debug logging is enabled
+   */
+  isDebugEnabled(): boolean {
+    return this.level >= LogLevel.DEBUG;
+  }
+
   private log(level: LogLevel, ...args: any[]) {
     if (this.level >= level) {
       const prefix = `[${LogLevel[level]}]`;

@@ -3,6 +3,12 @@ import { ENDPOINTS } from "./utils/constants";
 import { generateHeaders } from "./utils/headers";
 import { Logger, LogLevelString } from "./utils/logger";
 import {
+  MexcFuturesError,
+  MexcValidationError,
+  parseAxiosError,
+  formatErrorForLogging,
+} from "./utils/errors";
+import {
   OrderHistoryParams,
   OrderHistoryResponse,
   OrderDealsParams,
@@ -71,20 +77,32 @@ export class MexcFuturesSDK {
       return requestConfig;
     });
 
-    // Response interceptor for debugging
+    // Response interceptor for error handling
     this.httpClient.interceptors.response.use(
       (response) => {
         this.logger.debug(`✅ ${response.status} ${response.statusText}`);
         return response;
       },
       (error) => {
-        if (error.response) {
-          this.logger.error(
-            `❌ ${error.response.status} ${error.response.statusText}`
+        // Parse the axios error into a user-friendly MEXC error
+        const mexcError = parseAxiosError(
+          error,
+          error.config?.url,
+          error.config?.method?.toUpperCase()
+        );
+
+        // Log the user-friendly error message
+        this.logger.error(mexcError.getUserFriendlyMessage());
+
+        // Log detailed error information in debug mode
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug(
+            "Detailed error info:",
+            formatErrorForLogging(mexcError)
           );
-          this.logger.error("Error response:", error.response.data);
         }
-        return Promise.reject(error);
+
+        return Promise.reject(mexcError);
       }
     );
   }
@@ -126,7 +144,7 @@ export class MexcFuturesSDK {
       this.logger.debug("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
-      this.logger.error("Error submitting order:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -137,10 +155,16 @@ export class MexcFuturesSDK {
   async cancelOrder(orderIds: number[]): Promise<CancelOrderResponse> {
     try {
       if (orderIds.length === 0) {
-        throw new Error("Order IDs array cannot be empty");
+        throw new MexcValidationError(
+          "Order IDs array cannot be empty",
+          "orderIds"
+        );
       }
       if (orderIds.length > 50) {
-        throw new Error("Cannot cancel more than 50 orders at once");
+        throw new MexcValidationError(
+          "Cannot cancel more than 50 orders at once",
+          "orderIds"
+        );
       }
 
       // Generate headers with MEXC signature for POST request
@@ -165,7 +189,7 @@ export class MexcFuturesSDK {
       this.logger.debug("🔍 Cancel order response:", response.data);
       return response.data;
     } catch (error) {
-      this.logger.error("Error canceling orders:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -202,7 +226,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      this.logger.error("Error canceling order by external ID:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -236,7 +260,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      this.logger.error("Error canceling all orders:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -253,7 +277,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching order history:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -268,7 +292,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching order deals:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -286,7 +310,7 @@ export class MexcFuturesSDK {
       this.logger.debug("🔍 Order response:", response.data);
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching order:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -307,7 +331,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching order by external ID:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -320,7 +344,7 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(ENDPOINTS.RISK_LIMIT);
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching risk limit:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -333,7 +357,7 @@ export class MexcFuturesSDK {
       const response = await this.httpClient.get(ENDPOINTS.FEE_RATE);
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching fee rate:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -350,7 +374,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching account asset:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -368,7 +392,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching open positions:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -387,7 +411,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching position history:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -402,7 +426,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching ticker:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -420,7 +444,7 @@ export class MexcFuturesSDK {
       });
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching contract detail:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -443,7 +467,7 @@ export class MexcFuturesSDK {
       );
       return response.data;
     } catch (error) {
-      this.logger.error("Error fetching contract depth:", error);
+      // Error is already logged by the interceptor with user-friendly message
       throw error;
     }
   }
@@ -457,7 +481,7 @@ export class MexcFuturesSDK {
       await this.getTicker("BTC_USDT");
       return true;
     } catch (error) {
-      this.logger.error("Connection test failed:", error);
+      // Error is already logged by the interceptor, just return false
       return false;
     }
   }

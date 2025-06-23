@@ -223,15 +223,81 @@ await client.submitOrder({
 
 ## Error Handling
 
+The SDK provides comprehensive error handling with user-friendly error messages and specific error types.
+
+### Error Types
+
+```typescript
+import {
+  MexcAuthenticationError,
+  MexcSignatureError,
+  MexcApiError,
+  MexcNetworkError,
+  MexcValidationError,
+  MexcRateLimitError,
+  MexcFuturesError,
+} from "mexc-futures-sdk";
+```
+
+### Handling Different Error Types
+
 ```typescript
 try {
-  const order = await client.submitOrder({...});
-  console.log("Order placed:", order.data);
+  const asset = await client.getAccountAsset("USDT");
+  console.log("Success:", asset);
 } catch (error) {
-  console.error("Order failed:", error.message);
-}
+  if (error instanceof MexcAuthenticationError) {
+    console.log("❌ Authentication failed. Please update your WEB token.");
+  } else if (error instanceof MexcSignatureError) {
+    console.log("❌ Signature verification failed. Get a fresh WEB token.");
+  } else if (error instanceof MexcRateLimitError) {
+    console.log("❌ Rate limit exceeded. Please wait before retrying.");
+    if (error.retryAfter) {
+      console.log(`Retry after ${error.retryAfter} seconds`);
+    }
+  } else if (error instanceof MexcNetworkError) {
+    console.log("❌ Network error. Check your internet connection.");
+  } else if (error instanceof MexcValidationError) {
+    console.log(`❌ Validation error: ${error.message}`);
+  } else if (error instanceof MexcApiError) {
+    console.log(`❌ API error (${error.statusCode}): ${error.message}`);
+  }
 
-// WebSocket errors
+  // Get detailed error information for debugging
+  if (error instanceof MexcFuturesError) {
+    console.log("Error details:", error.getDetails());
+  }
+}
+```
+
+### User-Friendly Error Messages
+
+All errors provide user-friendly messages through `getUserFriendlyMessage()`:
+
+```typescript
+try {
+  await client.submitOrder({...});
+} catch (error) {
+  if (error instanceof MexcFuturesError) {
+    console.log(error.getUserFriendlyMessage());
+    // Example: "❌ Authentication failed. Your authorization token may be expired or invalid. Please update your WEB token from browser Developer Tools."
+  }
+}
+```
+
+### Common Error Scenarios
+
+| Error Type                | Common Causes               | Solutions                    |
+| ------------------------- | --------------------------- | ---------------------------- |
+| `MexcAuthenticationError` | Invalid/expired WEB token   | Get fresh token from browser |
+| `MexcSignatureError`      | Token authentication failed | Update WEB token             |
+| `MexcRateLimitError`      | Too many requests           | Wait and retry               |
+| `MexcNetworkError`        | Connection issues           | Check internet connection    |
+| `MexcValidationError`     | Invalid parameters          | Check request parameters     |
+
+### WebSocket Error Handling
+
+```typescript
 ws.on("error", (error) => {
   console.error("WebSocket error:", error);
 });
@@ -240,6 +306,21 @@ ws.on("disconnected", ({ code, reason }) => {
   console.log("Disconnected:", code, reason);
 });
 ```
+
+### Logging Levels
+
+Set `logLevel` to control error verbosity:
+
+```typescript
+const client = new MexcFuturesClient({
+  authToken: "WEB_YOUR_TOKEN",
+  logLevel: "INFO", // "SILENT", "ERROR", "WARN", "INFO", "DEBUG"
+});
+```
+
+- `ERROR`: Only error messages
+- `INFO`: User-friendly error messages
+- `DEBUG`: Detailed error information for debugging
 
 ## Complete Example
 

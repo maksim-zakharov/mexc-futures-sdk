@@ -550,6 +550,9 @@ export class MexcFuturesWebSocket extends EventEmitter {
       JSON.stringify(message)
     );
 
+    // DEBUG: Uncomment next line for detailed message debugging
+    // console.log("🔍 RAW MESSAGE:", JSON.stringify(message, null, 2));
+
     // Handle pong response
     if (message.channel === "pong") {
       this.emit("pong", message.data);
