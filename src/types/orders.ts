@@ -116,7 +116,7 @@ export interface OrderHistoryResponse {
 export interface OpenOrdersResponse {
   success: boolean;
   code: number;
-  data: OpenOrder;
+  data: OpenOrder[];
 }
 
 export interface OrderDealsParams {
