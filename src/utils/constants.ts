@@ -16,6 +16,10 @@ export const ENDPOINTS = {
   OPEN_POSITIONS: "/private/position/open_positions",
   POSITION_HISTORY: "/private/position/list/history_positions",
 
+  PLAN_ORDERS: "/private/planorder/list/orders",
+  OPEN_STOP_ORDERS: "/private/stoporder/open_orders",
+  OPEN_ORDERS: "/private/order/list/open_orders",
+
   // Public endpoints (no authentication required)
   TICKER: "/contract/ticker",
   CONTRACT_DETAIL: "/contract/detail",

@@ -1,6 +1,6 @@
 {
   "name": "mexc-futures-sdk",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Unofficial TypeScript SDK for MEXC Futures trading with maintenance bypass. Uses browser session tokens to work 24/7 even during API downtime.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,15 +31,15 @@
     "mexc-api",
     "maintenance-bypass"
   ],
-  "author": "oboshto",
+  "author": "Maksim Zakharov",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oboshto/mexc-futures-sdk.git"
+    "url": "https://github.com/maksim-zakharov/mexc-futures-sdk.git"
   },
-  "homepage": "https://github.com/oboshto/mexc-futures-sdk#readme",
+  "homepage": "https://github.com/maksim-zakharov/mexc-futures-sdk#readme",
   "bugs": {
-    "url": "https://github.com/oboshto/mexc-futures-sdk/issues"
+    "url": "https://github.com/maksim-zakharov/mexc-futures-sdk/issues"
   },
   "dependencies": {
     "@types/ws": "^8.18.1",

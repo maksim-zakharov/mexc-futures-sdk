@@ -128,6 +128,7 @@ export class MexcFuturesSDK {
           authToken: this.config.authToken,
           userAgent: this.config.userAgent,
           customHeaders: this.config.customHeaders,
+          logger: this.logger
         },
         true,
         orderParams
@@ -173,6 +174,7 @@ export class MexcFuturesSDK {
           authToken: this.config.authToken,
           userAgent: this.config.userAgent,
           customHeaders: this.config.customHeaders,
+          logger: this.logger
         },
         true,
         orderIds
@@ -207,6 +209,7 @@ export class MexcFuturesSDK {
           authToken: this.config.authToken,
           userAgent: this.config.userAgent,
           customHeaders: this.config.customHeaders,
+          logger: this.logger
         },
         true,
         params
@@ -246,6 +249,7 @@ export class MexcFuturesSDK {
           authToken: this.config.authToken,
           userAgent: this.config.userAgent,
           customHeaders: this.config.customHeaders,
+          logger: this.logger
         },
         true,
         payload
@@ -273,6 +277,57 @@ export class MexcFuturesSDK {
   ): Promise<OrderHistoryResponse> {
     try {
       const response = await this.httpClient.get(ENDPOINTS.ORDER_HISTORY, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      // Error is already logged by the interceptor with user-friendly message
+      throw error;
+    }
+  }
+
+  /**
+   * Get plan orders
+   */
+  async getPlanOrders(
+      params: OrderHistoryParams
+  ): Promise<OrderHistoryResponse> {
+    try {
+      const response = await this.httpClient.get(ENDPOINTS.PLAN_ORDERS, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      // Error is already logged by the interceptor with user-friendly message
+      throw error;
+    }
+  }
+
+  /**
+   * Get open stop orders
+   */
+  async getOpenStopOrders(
+      params: OrderHistoryParams
+  ): Promise<OrderHistoryResponse> {
+    try {
+      const response = await this.httpClient.get(ENDPOINTS.OPEN_STOP_ORDERS, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      // Error is already logged by the interceptor with user-friendly message
+      throw error;
+    }
+  }
+
+  /**
+   * Get open orders
+   */
+  async getOpenOrders(
+      params: OrderHistoryParams
+  ): Promise<OrderHistoryResponse> {
+    try {
+      const response = await this.httpClient.get(ENDPOINTS.OPEN_ORDERS, {
         params,
       });
       return response.data;

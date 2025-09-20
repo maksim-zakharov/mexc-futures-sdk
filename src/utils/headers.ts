@@ -1,10 +1,12 @@
 import { DEFAULT_HEADERS } from "./constants";
 import md5 from "md5";
+import {Logger} from "./logger";
 
 export interface SDKOptions {
   authToken: string; // WEB authentication token from browser
   userAgent?: string;
   customHeaders?: Record<string, string>; // Additional custom headers
+  logger?: Logger
 }
 
 /**
@@ -61,10 +63,7 @@ export function generateHeaders(
       headers["x-mxc-nonce"] = signature.time;
       headers["x-mxc-sign"] = signature.sign;
 
-      console.log("🔐 MEXC signature debug:");
-      console.log(`  Timestamp: ${signature.time}`);
-      console.log(`  Signature: ${signature.sign}`);
-      console.log(`  Request body: ${JSON.stringify(requestBody)}`);
+      options.logger?.debug("🔐 MEXC signature debug:", `Timestamp: ${signature.time}`, `Signature: ${signature.sign}`, `Request body: ${JSON.stringify(requestBody)}`);
     }
   }
 
