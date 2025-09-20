@@ -6,6 +6,91 @@ export interface OrderHistoryParams {
   symbol: string;
 }
 
+export interface OpenOrder {
+  orderId: string;
+  symbol: string;
+  // Если 0 - не привязано к позиции
+  positionId: number;
+  price: number;
+  priceStr: string;
+  vol: number;
+  leverage: number;
+  side: OrderSide;
+  category: number;
+  orderType: OrderType;
+  dealAvgPrice: number;
+  dealAvgPriceStr: string;
+  dealVol: number;
+  orderMargin: number;
+  takerFee: number;
+  makerFee: number;
+  profit: number;
+  feeCurrency: string;
+  openType: OrderOpenType;
+  state: OrderState;
+  externalOid: string;
+  errorCode: number;
+  usedMargin: number;
+  createTime: number;
+  updateTime: number;
+  positionMode: PositionMode;
+  reduceOnly: boolean;
+  version: number;
+  showCancelReason: number;
+  showProfitRateShare: number;
+  bboTypeNum: number;
+  totalFee: number;
+  zeroSaveTotalFeeBinance: number;
+  zeroTradeTotalFeeBinance: number;
+}
+
+export enum OrderState {
+  Uninformed = 1,
+  Uncompleted = 2,
+  Completed = 3,
+  Canceled = 4,
+  Invalid = 5,
+}
+
+export enum OrderSide {
+  CloseSell = 4,
+  Sell = 3,
+  CloseBuy = 2,
+  Buy = 1,
+}
+
+export enum OrderType {
+  Limit = 1,
+  PostOnlyMarket = 2,
+  Market = 5,
+}
+
+export enum OrderOpenType {
+  Isolated = 1,
+  Cross = 2,
+}
+
+export enum COrderState {
+  Uninformed = 1,
+  Uncompleted = 2,
+  Completed = 3,
+  Canceled = 4,
+  Invalid = 5,
+}
+
+export enum PositionMode {
+  Hedge = 1,
+  OneWay = 2,
+}
+
+export interface OrderParams {
+  category?: number;
+  page_num?: number;
+  page_size?: number;
+  states?: number;
+  symbol?: string;
+}
+
 export interface Order {
   id: string;
   symbol: string;
@@ -26,6 +111,12 @@ export interface OrderHistoryResponse {
     orders: Order[];
     total: number;
   };
+}
+
+export interface OpenOrdersResponse {
+  success: boolean;
+  code: number;
+  data: OpenOrder;
 }
 
 export interface OrderDealsParams {

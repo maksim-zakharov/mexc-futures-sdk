@@ -20,7 +20,7 @@ import {
   CancelAllOrdersResponse,
   SubmitOrderRequest,
   SubmitOrderResponse,
-  GetOrderResponse,
+  GetOrderResponse, OrderParams, OpenOrdersResponse,
 } from "./types/orders";
 import {
   RiskLimit,
@@ -290,8 +290,8 @@ export class MexcFuturesSDK {
    * Get plan orders
    */
   async getPlanOrders(
-      params: OrderHistoryParams
-  ): Promise<OrderHistoryResponse> {
+      params: OrderParams
+  ): Promise<OpenOrdersResponse> {
     try {
       const response = await this.httpClient.get(ENDPOINTS.PLAN_ORDERS, {
         params,
@@ -307,8 +307,8 @@ export class MexcFuturesSDK {
    * Get open stop orders
    */
   async getOpenStopOrders(
-      params: OrderHistoryParams
-  ): Promise<OrderHistoryResponse> {
+      params: OrderParams
+  ): Promise<OpenOrdersResponse> {
     try {
       const response = await this.httpClient.get(ENDPOINTS.OPEN_STOP_ORDERS, {
         params,
@@ -324,8 +324,8 @@ export class MexcFuturesSDK {
    * Get open orders
    */
   async getOpenOrders(
-      params: OrderHistoryParams
-  ): Promise<OrderHistoryResponse> {
+      params: OrderParams
+  ): Promise<OpenOrdersResponse> {
     try {
       const response = await this.httpClient.get(ENDPOINTS.OPEN_ORDERS, {
         params,
