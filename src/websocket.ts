@@ -630,7 +630,7 @@ export class MexcFuturesWebSocket extends EventEmitter {
         this.emit("deal", data);
         break;
       case "push.depth.full":
-        this.emit("depth.full", data);
+        this.emit("depth.full", message);
         break;
       case "push.depth":
         this.emit("depth", data);
